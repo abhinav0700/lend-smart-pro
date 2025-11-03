@@ -52,6 +52,7 @@ export type Database = {
           id: string
           interest_rate: number | null
           loan_type: Database["public"]["Enums"]["loan_type"]
+          next_due_date: string | null
           principal_amount: number
           remaining_balance: number | null
           remaining_tenure: number | null
@@ -69,6 +70,7 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           loan_type: Database["public"]["Enums"]["loan_type"]
+          next_due_date?: string | null
           principal_amount: number
           remaining_balance?: number | null
           remaining_tenure?: number | null
@@ -86,6 +88,7 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           loan_type?: Database["public"]["Enums"]["loan_type"]
+          next_due_date?: string | null
           principal_amount?: number
           remaining_balance?: number | null
           remaining_tenure?: number | null
@@ -162,6 +165,10 @@ export type Database = {
       calculate_fixed_interest: {
         Args: { principal: number; rate: number }
         Returns: number
+      }
+      calculate_next_due_date: {
+        Args: { loan_start_date: string; payments_count: number }
+        Returns: string
       }
     }
     Enums: {

@@ -79,6 +79,11 @@ export const LoansTable = ({ loans, onEdit, onRefetch }: LoansTableProps) => {
                   <Badge variant="outline">
                     {loan.loan_type === "fixed_interest" ? "Fixed Interest" : "EMI"}
                   </Badge>
+                  {loan.loan_type === "emi" && loan.next_due_date && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Next: {format(new Date(loan.next_due_date), "MMM dd")}
+                    </p>
+                  )}
                 </TableCell>
                 <TableCell>₹{Number(loan.principal_amount).toLocaleString()}</TableCell>
                 <TableCell className="text-success font-medium">
