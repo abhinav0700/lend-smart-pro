@@ -15,14 +15,28 @@ export const DashboardView = () => {
       ]);
 
       const activeLoans = loansResult.data?.filter(l => l.status === "active") || [];
+      const overdueLoans = loansResult.data?.filter(l => l.status === "overdue") || [];
       const totalCollected = paymentsResult.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const pendingDues = loansResult.data?.reduce((sum, l) => sum + Number(l.remaining_balance || 0), 0) || 0;
+      
+      // Calculate total outstanding (principal + interest not yet collected)
+      const totalOutstanding = loansResult.data?.reduce((sum, loan) => {
+        if (loan.status === "active" || loan.status === "overdue") {
+          const totalAmount = loan.loan_type === "fixed_interest"
+            ? Number(loan.principal_amount) + Number(loan.total_interest || 0)
+            : Number(loan.emi_amount || 0) * Number(loan.tenure_months || 0);
+          return sum + totalAmount;
+        }
+        return sum;
+      }, 0) || 0;
 
       return {
         totalCustomers: customersResult.count || 0,
         activeLoans: activeLoans.length,
+        overdueLoans: overdueLoans.length,
         totalCollected,
         pendingDues,
+        totalOutstanding,
       };
     },
   });

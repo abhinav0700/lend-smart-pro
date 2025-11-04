@@ -6,9 +6,20 @@ import { LoansView } from "@/components/loans/LoansView";
 import { ReportsView } from "@/components/reports/ReportsView";
 import { Header } from "@/components/layout/Header";
 import { DuePaymentAlert } from "@/components/notifications/DuePaymentAlert";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

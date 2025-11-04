@@ -5,8 +5,10 @@ interface StatsCardsProps {
   stats?: {
     totalCustomers: number;
     activeLoans: number;
+    overdueLoans: number;
     totalCollected: number;
     pendingDues: number;
+    totalOutstanding: number;
   };
 }
 
@@ -22,20 +24,22 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
     {
       title: "Active Loans",
       value: stats?.activeLoans || 0,
+      subtitle: stats?.overdueLoans ? `${stats.overdueLoans} overdue` : undefined,
       icon: TrendingUp,
       bgColor: "bg-accent/10",
       iconColor: "text-accent",
     },
     {
       title: "Total Collected",
-      value: `₹${stats?.totalCollected.toLocaleString() || 0}`,
+      value: `₹${(stats?.totalCollected || 0).toLocaleString()}`,
       icon: DollarSign,
       bgColor: "bg-success/10",
       iconColor: "text-success",
     },
     {
-      title: "Pending Dues",
-      value: `₹${stats?.pendingDues.toLocaleString() || 0}`,
+      title: "Outstanding Amount",
+      value: `₹${(stats?.totalOutstanding || 0).toLocaleString()}`,
+      subtitle: `₹${(stats?.pendingDues || 0).toLocaleString()} pending`,
       icon: AlertCircle,
       bgColor: "bg-warning/10",
       iconColor: "text-warning",
@@ -53,6 +57,9 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
                   <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                  {"subtitle" in card && card.subtitle && (
+                    <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                  )}
                 </div>
                 <div className={`p-3 rounded-lg ${card.bgColor}`}>
                   <Icon className={`w-6 h-6 ${card.iconColor}`} />

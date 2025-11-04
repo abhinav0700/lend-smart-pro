@@ -27,21 +27,42 @@ export const SearchBar = ({ onSelectCustomer, onSelectLoan }: SearchBarProps) =>
     queryFn: async () => {
       if (!searchQuery || searchQuery.length < 2) return { customers: [], loans: [] };
 
-      const [customersResult, loansResult] = await Promise.all([
-        supabase
-          .from("customers")
-          .select("*")
-          .or(`name.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)
-          .limit(5),
-        supabase
-          .from("loans")
-          .select(`*, customers:customer_id (name)`)
-          .limit(5),
-      ]);
+      // First get matching customers
+      const { data: customers } = await supabase
+        .from("customers")
+        .select("*")
+        .or(`name.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)
+        .limit(5);
+
+      // Get customer IDs for loan search
+      const customerIds = customers?.map(c => c.id) || [];
+
+      // Search loans by customer or amount
+      const loansQuery = supabase
+        .from("loans")
+        .select(`*, customers:customer_id (name)`)
+        .limit(5);
+
+      // Search by customer name match OR principal amount
+      if (customerIds.length > 0) {
+        const { data: loans } = await loansQuery.or(
+          `customer_id.in.(${customerIds.join(",")}),principal_amount.eq.${searchQuery}`
+        );
+        return {
+          customers: customers || [],
+          loans: loans || [],
+        };
+      }
+
+      // If no customer matches, try searching by amount only (if numeric)
+      const searchAmount = parseFloat(searchQuery);
+      const { data: loans } = !isNaN(searchAmount) 
+        ? await loansQuery.eq("principal_amount", searchAmount)
+        : { data: [] };
 
       return {
-        customers: customersResult.data || [],
-        loans: loansResult.data || [],
+        customers: customers || [],
+        loans: loans || [],
       };
     },
     enabled: searchQuery.length >= 2,
