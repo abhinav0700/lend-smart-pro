@@ -71,6 +71,7 @@ export default function Auth() {
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: name,
           },
@@ -124,7 +125,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">LendTrack</CardTitle>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Magzhilini Finance</CardTitle>
           <CardDescription>Secure Lending Management System</CardDescription>
         </CardHeader>
         <CardContent>
