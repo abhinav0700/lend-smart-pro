@@ -29,21 +29,21 @@ export default function Auth() {
 
       if (error) throw error;
 
-      // Check if user has a role
-      const { data: roleData } = await supabase
+      // Check if user has a role, create one if not
+      const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", data.user.id)
-        .single();
+        .maybeSingle();
 
-      if (!roleData) {
-        await supabase.auth.signOut();
-        toast({
-          title: "Access Denied",
-          description: "Your account doesn't have access. Please contact an administrator.",
-          variant: "destructive",
-        });
-        return;
+      // If no role exists, create viewer role automatically
+      if (!roleData && !roleError) {
+        await supabase
+          .from("user_roles")
+          .insert({
+            user_id: data.user.id,
+            role: "viewer",
+          });
       }
 
       toast({
@@ -125,7 +125,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Magzhilini Finance</CardTitle>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mazhilini Finance</CardTitle>
           <CardDescription>Secure Lending Management System</CardDescription>
         </CardHeader>
         <CardContent>

@@ -26,9 +26,20 @@ export const useAuth = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            setUserRole(data as UserRole);
+          .maybeSingle()
+          .then(async ({ data, error }) => {
+            if (!data && !error) {
+              // Auto-create viewer role if none exists
+              await supabase
+                .from("user_roles")
+                .insert({
+                  user_id: session.user.id,
+                  role: "viewer",
+                });
+              setUserRole({ role: "viewer" });
+            } else {
+              setUserRole(data as UserRole);
+            }
             setLoading(false);
           });
       } else {
@@ -49,9 +60,20 @@ export const useAuth = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            setUserRole(data as UserRole);
+          .maybeSingle()
+          .then(async ({ data, error }) => {
+            if (!data && !error) {
+              // Auto-create viewer role if none exists
+              await supabase
+                .from("user_roles")
+                .insert({
+                  user_id: session.user.id,
+                  role: "viewer",
+                });
+              setUserRole({ role: "viewer" });
+            } else {
+              setUserRole(data as UserRole);
+            }
           });
       } else {
         setUserRole(null);

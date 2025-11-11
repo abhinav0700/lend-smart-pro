@@ -17,7 +17,7 @@ export const Header = () => {
               <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Magzhilini Finance</h1>
+              <h1 className="text-2xl font-bold text-foreground">Mazhilini Finance</h1>
               <p className="text-sm text-muted-foreground">Lending Management System</p>
             </div>
           </div>
