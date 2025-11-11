@@ -38,6 +38,13 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
     if (!loan) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
       const { error } = await supabase.from("payments").insert([
         {
           loan_id: loan.id,
@@ -46,6 +53,7 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
           payment_date: values.payment_date,
           payment_type: values.payment_type,
           notes: values.notes,
+          user_id: user.id,
         },
       ]);
 

@@ -79,12 +79,20 @@ export const LoanDialog = ({ open, onClose, loan }: LoanDialogProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
       const principal = parseFloat(values.principal_amount);
       let loanData: any = {
         customer_id: values.customer_id,
         loan_type: values.loan_type,
         principal_amount: principal,
         start_date: values.start_date,
+        user_id: user.id,
       };
 
       if (values.loan_type === "fixed_interest") {

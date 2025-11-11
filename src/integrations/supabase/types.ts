@@ -23,6 +23,7 @@ export type Database = {
           id_proof: string | null
           name: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -32,6 +33,7 @@ export type Database = {
           id_proof?: string | null
           name: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           id_proof?: string | null
           name?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -62,6 +65,7 @@ export type Database = {
           total_collected: number | null
           total_interest: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -80,6 +84,7 @@ export type Database = {
           total_collected?: number | null
           total_interest?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -98,6 +103,7 @@ export type Database = {
           total_collected?: number | null
           total_interest?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -119,6 +125,7 @@ export type Database = {
           notes: string | null
           payment_date: string
           payment_type: Database["public"]["Enums"]["payment_type"]
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -129,6 +136,7 @@ export type Database = {
           notes?: string | null
           payment_date: string
           payment_type: Database["public"]["Enums"]["payment_type"]
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -139,6 +147,7 @@ export type Database = {
           notes?: string | null
           payment_date?: string
           payment_type?: Database["public"]["Enums"]["payment_type"]
+          user_id?: string | null
         }
         Relationships: [
           {

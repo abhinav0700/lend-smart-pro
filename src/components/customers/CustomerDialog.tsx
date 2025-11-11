@@ -49,6 +49,13 @@ export const CustomerDialog = ({ open, onClose, customer }: CustomerDialogProps)
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
       if (customer) {
         const { error } = await supabase
           .from("customers")
@@ -63,6 +70,7 @@ export const CustomerDialog = ({ open, onClose, customer }: CustomerDialogProps)
           contact_number: values.contact_number,
           address: values.address || null,
           id_proof: values.id_proof || null,
+          user_id: user.id,
         }]);
 
         if (error) throw error;
@@ -72,6 +80,7 @@ export const CustomerDialog = ({ open, onClose, customer }: CustomerDialogProps)
       onClose();
     } catch (error) {
       toast.error("Failed to save customer");
+      console.error(error);
     }
   };
 
