@@ -51,7 +51,7 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <Card key={card.title} className="border-border">
+          <Card key={card.title} className="border-border hover:shadow-elegant transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -61,7 +61,7 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
                     <p className="text-xs text-muted-foreground">{card.subtitle}</p>
                   )}
                 </div>
-                <div className={`p-3 rounded-lg ${card.bgColor}`}>
+                <div className={`p-3 rounded-lg ${card.bgColor} transition-all duration-300`}>
                   <Icon className={`w-6 h-6 ${card.iconColor}`} />
                 </div>
               </div>

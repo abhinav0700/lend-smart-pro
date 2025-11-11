@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoansTable } from "./LoansTable";
 import { LoanDialog } from "./LoanDialog";
+import { ExportButton } from "@/components/reports/ExportButton";
 
 export const LoansView = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -51,10 +52,13 @@ export const LoansView = () => {
           <h2 className="text-3xl font-bold text-foreground mb-2">Loans</h2>
           <p className="text-muted-foreground">Manage all loan accounts</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Loan
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton data={loans || []} filename={`loans_${statusFilter}`} type="loans" />
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Loan
+          </Button>
+        </div>
       </div>
 
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>

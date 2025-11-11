@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CustomersTable } from "./CustomersTable";
 import { CustomerDialog } from "./CustomerDialog";
+import { ExportButton } from "@/components/reports/ExportButton";
 
 export const CustomersView = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,10 +42,13 @@ export const CustomersView = () => {
           <h2 className="text-3xl font-bold text-foreground mb-2">Customers</h2>
           <p className="text-muted-foreground">Manage your customer database</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Customer
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton data={customers || []} filename="customers" type="customers" />
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Customer
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

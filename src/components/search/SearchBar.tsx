@@ -27,20 +27,26 @@ export const SearchBar = ({ onSelectCustomer, onSelectLoan }: SearchBarProps) =>
     queryFn: async () => {
       if (!searchQuery || searchQuery.length < 2) return { customers: [], loans: [] };
 
-      // First get matching customers
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { customers: [], loans: [] };
+
+      // First get matching customers for current user
       const { data: customers } = await supabase
         .from("customers")
         .select("*")
+        .eq("user_id", user.id)
         .or(`name.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)
         .limit(5);
 
       // Get customer IDs for loan search
       const customerIds = customers?.map(c => c.id) || [];
 
-      // Search loans by customer or amount
+      // Search loans by customer or amount for current user
       const loansQuery = supabase
         .from("loans")
         .select(`*, customers:customer_id (name)`)
+        .eq("user_id", user.id)
         .limit(5);
 
       // Search by customer name match OR principal amount
