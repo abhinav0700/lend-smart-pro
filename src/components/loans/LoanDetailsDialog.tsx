@@ -141,6 +141,19 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
                           ₹{Number(payment.amount).toLocaleString()}
                         </TableCell>
                         <TableCell>
+                          <Badge variant={
+                            payment.payment_category === 'interest' ? 'secondary' :
+                            payment.payment_category === 'principal' ? 'default' :
+                            payment.payment_category === 'partial' ? 'outline' : 'default'
+                          }>
+                            {payment.payment_category === 'interest' ? 'Interest' :
+                             payment.payment_category === 'principal' ? 'Principal' :
+                             payment.payment_category === 'full' ? 'Full EMI' :
+                             payment.payment_category === 'partial' ? 'Partial EMI' :
+                             payment.payment_category || 'Regular'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="outline">{payment.payment_type}</Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">

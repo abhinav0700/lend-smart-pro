@@ -212,7 +212,7 @@ export const LoanDialog = ({ open, onClose, loan }: LoanDialogProps) => {
                 name="interest_rate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Interest Rate (%)</FormLabel>
+                    <FormLabel>Interest Rate (% Per Annum)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
                     </FormControl>

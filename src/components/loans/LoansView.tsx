@@ -27,7 +27,13 @@ export const LoansView = () => {
         `)
         .order("created_at", { ascending: false });
 
-      if (statusFilter !== "all") {
+      if (statusFilter === "all") {
+        // Show only active and overdue loans (not closed/completed)
+        query = query.in("status", ["active", "overdue"] as any);
+      } else if (statusFilter === "closed") {
+        // Show both closed and completed
+        query = query.in("status", ["closed", "completed"] as any);
+      } else {
         query = query.eq("status", statusFilter as any);
       }
 
