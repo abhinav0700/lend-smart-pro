@@ -128,7 +128,8 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Amount</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Method</TableHead>
                       <TableHead>Notes</TableHead>
                     </TableRow>
                   </TableHeader>
