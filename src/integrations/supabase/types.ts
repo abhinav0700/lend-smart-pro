@@ -49,6 +49,7 @@ export type Database = {
       }
       loans: {
         Row: {
+          carry_forward_amount: number | null
           created_at: string | null
           customer_id: string
           emi_amount: number | null
@@ -68,6 +69,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          carry_forward_amount?: number | null
           created_at?: string | null
           customer_id: string
           emi_amount?: number | null
@@ -87,6 +89,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          carry_forward_amount?: number | null
           created_at?: string | null
           customer_id?: string
           emi_amount?: number | null
@@ -123,6 +126,7 @@ export type Database = {
           id: string
           loan_id: string
           notes: string | null
+          payment_category: string | null
           payment_date: string
           payment_type: Database["public"]["Enums"]["payment_type"]
           user_id: string | null
@@ -134,6 +138,7 @@ export type Database = {
           id?: string
           loan_id: string
           notes?: string | null
+          payment_category?: string | null
           payment_date: string
           payment_type: Database["public"]["Enums"]["payment_type"]
           user_id?: string | null
@@ -145,6 +150,7 @@ export type Database = {
           id?: string
           loan_id?: string
           notes?: string | null
+          payment_category?: string | null
           payment_date?: string
           payment_type?: Database["public"]["Enums"]["payment_type"]
           user_id?: string | null
@@ -200,9 +206,10 @@ export type Database = {
         Args: { loan_start_date: string; payments_count: number }
         Returns: string
       }
+      check_overdue_loans: { Args: never; Returns: undefined }
     }
     Enums: {
-      loan_status: "active" | "completed" | "overdue"
+      loan_status: "active" | "completed" | "overdue" | "closed"
       loan_type: "fixed_interest" | "emi"
       payment_type: "cash" | "online" | "cheque"
     }
@@ -332,7 +339,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      loan_status: ["active", "completed", "overdue"],
+      loan_status: ["active", "completed", "overdue", "closed"],
       loan_type: ["fixed_interest", "emi"],
       payment_type: ["cash", "online", "cheque"],
     },
