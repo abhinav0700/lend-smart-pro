@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ export const LoansView = () => {
   const { data: loans, isLoading, refetch } = useQuery({
     queryKey: ["loans", statusFilter],
     queryFn: async () => {
+      // Check overdue status on each fetch
+      await supabase.rpc("check_overdue_loans" as any);
+
       let query = supabase
         .from("loans")
         .select(`
@@ -25,7 +28,7 @@ export const LoansView = () => {
         .order("created_at", { ascending: false });
 
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter as "active" | "completed" | "overdue");
+        query = query.eq("status", statusFilter as any);
       }
 
       const { data, error } = await query;
@@ -67,6 +70,7 @@ export const LoansView = () => {
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="overdue">Overdue</TabsTrigger>
+          <TabsTrigger value="closed">Closed</TabsTrigger>
         </TabsList>
 
         <TabsContent value={statusFilter} className="mt-6">

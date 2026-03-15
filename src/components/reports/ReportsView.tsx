@@ -3,31 +3,37 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Filter } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 
 export const ReportsView = () => {
-  const [dateRange, setDateRange] = useState({
+  const [pendingRange, setPendingRange] = useState({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0],
     to: new Date().toISOString().split("T")[0],
   });
 
+  const [appliedRange, setAppliedRange] = useState({
+    from: pendingRange.from,
+    to: pendingRange.to,
+  });
+
   const { data: reportData, isLoading } = useQuery({
-    queryKey: ["reports", dateRange],
+    queryKey: ["reports", appliedRange],
     queryFn: async () => {
       const [loansResult, paymentsResult, customersResult] = await Promise.all([
         supabase
           .from("loans")
           .select(`*, customers:customer_id (name)`)
-          .gte("start_date", dateRange.from)
-          .lte("start_date", dateRange.to),
+          .gte("start_date", appliedRange.from)
+          .lte("start_date", appliedRange.to),
         supabase
           .from("payments")
           .select(`*, customers:customer_id (name), loans:loan_id (loan_type)`)
-          .gte("payment_date", dateRange.from)
-          .lte("payment_date", dateRange.to),
+          .gte("payment_date", appliedRange.from)
+          .lte("payment_date", appliedRange.to),
         supabase.from("customers").select("*", { count: "exact", head: true }),
       ]);
 
@@ -51,6 +57,10 @@ export const ReportsView = () => {
     },
   });
 
+  const handleApply = () => {
+    setAppliedRange({ ...pendingRange });
+  };
+
   const exportToCSV = () => {
     if (!reportData) return;
 
@@ -72,13 +82,9 @@ export const ReportsView = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `payment-report-${dateRange.from}-to-${dateRange.to}.csv`;
+    a.download = `payment-report-${appliedRange.from}-to-${appliedRange.to}.csv`;
     a.click();
   };
-
-  if (isLoading) {
-    return <div className="text-center py-8">Loading report...</div>;
-  }
 
   return (
     <div className="space-y-6">
@@ -87,128 +93,136 @@ export const ReportsView = () => {
           <h2 className="text-3xl font-bold text-foreground mb-2">Reports & Analytics</h2>
           <p className="text-muted-foreground">Detailed business insights</p>
         </div>
-        <Button onClick={exportToCSV}>
+        <Button onClick={exportToCSV} disabled={!reportData}>
           <Download className="w-4 h-4 mr-2" />
           Export CSV
         </Button>
       </div>
 
-      {/* Date Range Filters */}
+      {/* Date Range Filters with Apply Button */}
       <Card>
         <CardHeader>
           <CardTitle>Date Range</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex-1">
               <label className="text-sm font-medium mb-2 block">From Date</label>
-              <input
+              <Input
                 type="date"
-                value={dateRange.from}
-                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
+                value={pendingRange.from}
+                onChange={(e) => setPendingRange({ ...pendingRange, from: e.target.value })}
               />
             </div>
-            <div>
+            <div className="flex-1">
               <label className="text-sm font-medium mb-2 block">To Date</label>
-              <input
+              <Input
                 type="date"
-                value={dateRange.to}
-                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
+                value={pendingRange.to}
+                onChange={(e) => setPendingRange({ ...pendingRange, to: e.target.value })}
               />
             </div>
+            <Button onClick={handleApply} className="min-w-[120px]">
+              <Filter className="w-4 h-4 mr-2" />
+              Apply
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Disbursed</p>
-                <p className="text-2xl font-bold">₹{reportData?.totalDisbursed.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="text-center py-8">Loading report...</div>
+      ) : (
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-primary/10">
+                    <FileText className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Disbursed</p>
+                    <p className="text-2xl font-bold">₹{reportData?.totalDisbursed.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-success/10">
-                <FileText className="w-6 h-6 text-success" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Collected</p>
-                <p className="text-2xl font-bold">₹{reportData?.totalCollected.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-success/10">
+                    <FileText className="w-6 h-6 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Collected</p>
+                    <p className="text-2xl font-bold">₹{reportData?.totalCollected.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-accent/10">
-                <FileText className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">New Loans</p>
-                <p className="text-2xl font-bold">{reportData?.loans.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-accent/10">
+                    <FileText className="w-6 h-6 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">New Loans</p>
+                    <p className="text-2xl font-bold">{reportData?.loans.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Payment Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {reportData && reportData.payments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Loan Type</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reportData.payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>{format(new Date(payment.payment_date), "MMM dd, yyyy")}</TableCell>
-                    <TableCell>{payment.customers?.name}</TableCell>
-                    <TableCell className="font-bold text-success">
-                      ₹{Number(payment.amount).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{payment.payment_type}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{payment.loans?.loan_type}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">
-              No payments in selected date range
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          {/* Payment Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {reportData && reportData.payments.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Loan Type</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportData.payments.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell>{format(new Date(payment.payment_date), "MMM dd, yyyy")}</TableCell>
+                        <TableCell>{payment.customers?.name}</TableCell>
+                        <TableCell className="font-bold text-success">
+                          ₹{Number(payment.amount).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{payment.payment_type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{payment.loans?.loan_type}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No payments in selected date range
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
