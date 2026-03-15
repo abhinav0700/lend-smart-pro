@@ -90,9 +90,9 @@ export const LoansTable = ({ loans, onEdit, onRefetch }: LoansTableProps) => {
                     <Badge variant="outline">
                       {loan.loan_type === "fixed_interest" ? "Fixed Interest" : "EMI"}
                     </Badge>
-                    {loan.loan_type === "emi" && loan.next_due_date && !isClosed && (
+                    {loan.next_due_date && !isClosed && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Next: {format(new Date(loan.next_due_date), "MMM dd")}
+                        Due: {format(new Date(loan.next_due_date), "MMM dd, yyyy")}
                       </p>
                     )}
                   </TableCell>

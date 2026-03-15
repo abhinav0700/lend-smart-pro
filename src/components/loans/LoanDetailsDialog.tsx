@@ -73,13 +73,23 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
               {loan.loan_type === "fixed_interest" ? (
                 <>
                   <div>
-                    <p className="text-sm text-muted-foreground">Interest Rate</p>
+                    <p className="text-sm text-muted-foreground">Interest Rate (P.A.)</p>
                     <p className="font-medium">{loan.interest_rate}%</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Interest</p>
-                    <p className="font-bold">₹{Number(loan.total_interest || 0).toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Monthly Interest</p>
+                    <p className="font-bold">₹{Math.round((Number(loan.remaining_balance || loan.principal_amount) * Number(loan.interest_rate || 0)) / (100 * 12)).toLocaleString()}</p>
                   </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Interest Collected</p>
+                    <p className="font-bold text-success">₹{Number(loan.total_interest || 0).toLocaleString()}</p>
+                  </div>
+                  {loan.next_due_date && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Next Due Date</p>
+                      <p className="font-medium">{format(new Date(loan.next_due_date), "MMM dd, yyyy")}</p>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -128,7 +138,8 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Amount</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Method</TableHead>
                       <TableHead>Notes</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -138,6 +149,19 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
                         <TableCell>{format(new Date(payment.payment_date), "MMM dd, yyyy")}</TableCell>
                         <TableCell className="font-bold text-success">
                           ₹{Number(payment.amount).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            payment.payment_category === 'interest' ? 'secondary' :
+                            payment.payment_category === 'principal' ? 'default' :
+                            payment.payment_category === 'partial' ? 'outline' : 'default'
+                          }>
+                            {payment.payment_category === 'interest' ? 'Interest' :
+                             payment.payment_category === 'principal' ? 'Principal' :
+                             payment.payment_category === 'full' ? 'Full EMI' :
+                             payment.payment_category === 'partial' ? 'Partial EMI' :
+                             payment.payment_category || 'Regular'}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{payment.payment_type}</Badge>

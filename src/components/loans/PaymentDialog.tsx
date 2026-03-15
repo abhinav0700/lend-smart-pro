@@ -49,8 +49,9 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
     if (!loan) return;
 
     if (isFixedInterest && paymentCategory === "interest") {
-      const interestAmount = (Number(loan.principal_amount) * Number(loan.interest_rate || 0)) / 100;
-      form.setValue("amount", interestAmount.toString());
+      // Interest rate is per annum, calculate monthly interest
+      const monthlyInterest = (Number(loan.remaining_balance || loan.principal_amount) * Number(loan.interest_rate || 0)) / (100 * 12);
+      form.setValue("amount", Math.round(monthlyInterest).toString());
     } else if (isFixedInterest && paymentCategory === "principal") {
       form.setValue("amount", "");
     } else if (isEMI && paymentCategory === "full") {
