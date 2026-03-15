@@ -31,7 +31,7 @@ export const SearchBar = ({ onSelectCustomer, onSelectLoan }: SearchBarProps) =>
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { customers: [], loans: [] };
 
-      // First get matching customers for current user
+      // Search matching customers
       const { data: customers } = await supabase
         .from("customers")
         .select("*")
@@ -39,32 +39,28 @@ export const SearchBar = ({ onSelectCustomer, onSelectLoan }: SearchBarProps) =>
         .or(`name.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)
         .limit(5);
 
-      // Get customer IDs for loan search
       const customerIds = customers?.map(c => c.id) || [];
+      const searchAmount = parseFloat(searchQuery);
+      const isSearchAmountNumeric = !isNaN(searchAmount) && /^\d/.test(searchQuery);
 
-      // Search loans by customer or amount for current user
-      const loansQuery = supabase
+      let loansQuery = supabase
         .from("loans")
         .select(`*, customers:customer_id (name)`)
         .eq("user_id", user.id)
         .limit(5);
 
-      // Search by customer name match OR principal amount
-      if (customerIds.length > 0) {
-        const { data: loans } = await loansQuery.or(
-          `customer_id.in.(${customerIds.join(",")}),principal_amount.eq.${searchQuery}`
-        );
-        return {
-          customers: customers || [],
-          loans: loans || [],
-        };
+      if (customerIds.length > 0 && isSearchAmountNumeric) {
+        loansQuery = loansQuery.or(`customer_id.in.(${customerIds.join(",")}),principal_amount.eq.${searchAmount}`);
+      } else if (customerIds.length > 0) {
+        loansQuery = loansQuery.in("customer_id", customerIds);
+      } else if (isSearchAmountNumeric) {
+        loansQuery = loansQuery.eq("principal_amount", searchAmount);
+      } else {
+        // No customers match and not numeric
+        return { customers: customers || [], loans: [] };
       }
 
-      // If no customer matches, try searching by amount only (if numeric)
-      const searchAmount = parseFloat(searchQuery);
-      const { data: loans } = !isNaN(searchAmount) 
-        ? await loansQuery.eq("principal_amount", searchAmount)
-        : { data: [] };
+      const { data: loans } = await loansQuery;
 
       return {
         customers: customers || [],

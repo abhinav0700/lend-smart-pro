@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   amount: z.string().min(1, "Amount is required"),
@@ -27,6 +28,7 @@ interface PaymentDialogProps {
 }
 
 export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
+  const queryClient = useQueryClient();
   const isFixedInterest = loan?.loan_type === "fixed_interest";
   const isEMI = loan?.loan_type === "emi";
   const isClosed = loan?.status === "closed" || loan?.status === "completed";
@@ -66,15 +68,23 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
   useEffect(() => {
     if (open && loan) {
       const defaultCategory = isFixedInterest ? "interest" : "full";
+      let defaultAmount = "";
+      if (isFixedInterest) {
+        const monthlyInterest = (Number(loan.remaining_balance || loan.principal_amount) * Number(loan.interest_rate || 0)) / (100 * 12);
+        defaultAmount = Math.round(monthlyInterest).toString();
+      } else if (isEMI) {
+        defaultAmount = (Number(loan.emi_amount || 0) + Number(loan.carry_forward_amount || 0)).toString();
+      }
+      
       form.reset({
-        amount: "",
+        amount: defaultAmount,
         payment_date: new Date().toISOString().split("T")[0],
         payment_type: "cash",
         payment_category: defaultCategory,
         notes: "",
       });
     }
-  }, [open, loan, isFixedInterest, form]);
+  }, [open, loan, isFixedInterest, isEMI, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!loan) return;
@@ -119,6 +129,8 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
       if (error) throw error;
 
       toast.success("Payment recorded successfully");
+      queryClient.invalidateQueries({ queryKey: ["loan-payments", loan.id] });
+      queryClient.invalidateQueries({ queryKey: ["loans"] });
       form.reset();
       onClose();
     } catch (error) {
@@ -147,8 +159,8 @@ export const PaymentDialog = ({ open, onClose, loan }: PaymentDialogProps) => {
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
               <div>
-                <p className="text-sm text-muted-foreground">Principal</p>
-                <p className="font-bold">₹{Number(loan.principal_amount).toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">{isFixedInterest ? "Current Principal" : "Principal"}</p>
+                <p className="font-bold">₹{Number(isFixedInterest ? (loan.remaining_balance || loan.principal_amount) : loan.principal_amount).toLocaleString()}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Remaining Balance</p>

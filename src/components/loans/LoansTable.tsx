@@ -41,11 +41,10 @@ export const LoansTable = ({ loans, onEdit, onRefetch }: LoansTableProps) => {
       case "active":
         return "bg-primary/10 text-primary";
       case "completed":
-        return "bg-success/10 text-success";
-      case "overdue":
-        return "bg-destructive/10 text-destructive";
       case "closed":
         return "bg-muted text-muted-foreground";
+      case "overdue":
+        return "bg-destructive/10 text-destructive";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -96,7 +95,7 @@ export const LoansTable = ({ loans, onEdit, onRefetch }: LoansTableProps) => {
                       </p>
                     )}
                   </TableCell>
-                  <TableCell>₹{Number(loan.principal_amount).toLocaleString()}</TableCell>
+                  <TableCell>₹{Number(loan.loan_type === 'fixed_interest' ? (loan.remaining_balance || loan.principal_amount) : loan.principal_amount).toLocaleString()}</TableCell>
                   <TableCell className="text-success font-medium">
                     ₹{Number(loan.total_collected || 0).toLocaleString()}
                   </TableCell>
@@ -105,7 +104,9 @@ export const LoansTable = ({ loans, onEdit, onRefetch }: LoansTableProps) => {
                   </TableCell>
                   <TableCell>{format(new Date(loan.start_date), "MMM dd, yyyy")}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(loan.status)}>{loan.status}</Badge>
+                    <Badge className={getStatusColor(loan.status)}>
+                      {loan.status === 'completed' ? 'closed' : loan.status}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-1">
                     <Button variant="outline" size="sm" onClick={() => handleViewDetails(loan)}>

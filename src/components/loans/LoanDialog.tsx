@@ -103,7 +103,9 @@ export const LoanDialog = ({ open, onClose, loan }: LoanDialogProps) => {
         loanData.total_interest = 0; // Will accumulate as interest payments are made
         loanData.remaining_balance = principal; // Only principal tracked as balance
         // Set first due date one month from start
-        loanData.next_due_date = values.start_date;
+        const startDateObj = new Date(values.start_date);
+        startDateObj.setMonth(startDateObj.getMonth() + 1);
+        loanData.next_due_date = startDateObj.toISOString().split("T")[0];
       } else {
         const emi = parseFloat(values.emi_amount || "0");
         const tenure = parseInt(values.tenure_months || "0");

@@ -13,7 +13,7 @@ interface LoanDetailsDialogProps {
 }
 
 export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProps) => {
-  const { data: payments } = useQuery({
+  const { data: payments, isLoading: isPaymentsLoading } = useQuery({
     queryKey: ["loan-payments", loan?.id],
     queryFn: async () => {
       if (!loan) return [];
@@ -68,7 +68,7 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Principal Amount</p>
-                <p className="font-bold">₹{Number(loan.principal_amount).toLocaleString()}</p>
+                <p className="font-bold">₹{Number(loan.loan_type === 'fixed_interest' ? (loan.remaining_balance || loan.principal_amount) : loan.principal_amount).toLocaleString()}</p>
               </div>
               {loan.loan_type === "fixed_interest" ? (
                 <>
@@ -144,7 +144,11 @@ export const LoanDetailsDialog = ({ open, onClose, loan }: LoanDetailsDialogProp
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {payments.map((payment) => (
+                    {isPaymentsLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">Loading payments...</TableCell>
+                      </TableRow>
+                    ) : payments?.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell>{format(new Date(payment.payment_date), "MMM dd, yyyy")}</TableCell>
                         <TableCell className="font-bold text-success">
