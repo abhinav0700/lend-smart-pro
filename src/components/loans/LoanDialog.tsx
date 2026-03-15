@@ -97,10 +97,13 @@ export const LoanDialog = ({ open, onClose, loan }: LoanDialogProps) => {
 
       if (values.loan_type === "fixed_interest") {
         const rate = parseFloat(values.interest_rate || "0");
-        const totalInterest = (principal * rate) / 100;
+        // Interest rate is per annum, monthly = (principal * rate) / (100 * 12)
+        const monthlyInterest = (principal * rate) / (100 * 12);
         loanData.interest_rate = rate;
-        loanData.total_interest = totalInterest;
-        loanData.remaining_balance = principal + totalInterest;
+        loanData.total_interest = 0; // Will accumulate as interest payments are made
+        loanData.remaining_balance = principal; // Only principal tracked as balance
+        // Set first due date one month from start
+        loanData.next_due_date = values.start_date;
       } else {
         const emi = parseFloat(values.emi_amount || "0");
         const tenure = parseInt(values.tenure_months || "0");
