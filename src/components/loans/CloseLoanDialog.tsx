@@ -38,7 +38,7 @@ export const CloseLoanDialog = ({ open, onClose, loan }: CloseLoanDialogProps) =
           customer_id: loan.customer_id,
           amount: remainingBalance,
           payment_date: paymentDate,
-          payment_type: paymentType,
+          payment_type: paymentType as "cash" | "online" | "cheque",
           payment_category: "closure",
           notes: "Loan closure - final settlement",
           user_id: user.id,
